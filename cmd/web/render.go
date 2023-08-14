@@ -24,10 +24,10 @@ type templateData struct {
 
 var functions = template.FuncMap{}
 
-//go:embed templates/*
+//go:embed templates
 var templateFS embed.FS
 
-// *application gives access to our config
+
 func (app *application) addDefaultData(td *templateData, r *http.Request) *templateData {
 	return td
 }
@@ -37,7 +37,6 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 	var err error
 	templateToRender := fmt.Sprintf("templates/%s.page.gohtml", page)
 
-	// templateInMap is True if templateToRender is in templateCache, actual value of templateInMap is ignored as per _.
 	_, templateInMap := app.templateCache[templateToRender]
 
 	if app.config.env == "production" && templateInMap {
@@ -49,7 +48,7 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 			return err
 		}
 	}
-	// if data is empty, creates new struct referencing templateData
+
 	if td == nil {
 		td = &templateData{}
 	}
@@ -68,14 +67,14 @@ func (app *application) renderTemplate(w http.ResponseWriter, r *http.Request, p
 func (app *application) parseTemplate(partials []string, page, templateToRender string) (*template.Template, error) {
 	var t *template.Template
 	var err error
-
+	
 	// build partials
 	if len(partials) > 0 {
 		for i, x := range partials {
 			partials[i] = fmt.Sprintf("templates/%s.partial.gohtml", x)
 		}
 	}
-	// .Funcs(functions) gives access to functions defined in line 25
+
 	if len(partials) > 0 {
 		t, err = template.New(fmt.Sprintf("%s.page.gohtml", page)).Funcs(functions).ParseFS(templateFS, "templates/base.layout.gohtml", strings.Join(partials, ","), templateToRender)
 	} else {
