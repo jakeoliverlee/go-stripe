@@ -1,3 +1,7 @@
+STRIPE_SECRET=sk_test_51Nc3poDrsASSuWnLkqb2s439GClxmwJGj4GsKF399q6VE05XThKvw6rkAB3QxuLmWcOCjexyqMmzD5emZub1y9Cv00tQYyhNva
+STRIPE_KEY=pk_test_51Nc3poDrsASSuWnLyDSB1TulZ7OXSyzHGWc2OdZoDmqGYTEb8vBchaO6T1ztlJAdhMLk32RzkFXk47zdRdxUH6Uc00SbLQtQKx
+GOSTRIPE_PORT=4000
+API_PORT=4001
 
 ## build: builds all binaries
 build: clean build_front build_back
