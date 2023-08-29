@@ -3,6 +3,7 @@ package cards
 import (
 	"github.com/stripe/stripe-go/v72"
 	"github.com/stripe/stripe-go/v72/paymentintent"
+	"github.com/stripe/stripe-go/v72/paymentmethod"
 )
 
 type Card struct {
@@ -28,7 +29,7 @@ func (c *Card) CreatePaymentIntent(currency string, amount int) (*stripe.Payment
 
 	// create a payment intent
 	params := &stripe.PaymentIntentParams{
-		Amount: stripe.Int64(int64(amount)),
+		Amount:   stripe.Int64(int64(amount)),
 		Currency: stripe.String(currency),
 	}
 
@@ -43,6 +44,30 @@ func (c *Card) CreatePaymentIntent(currency string, amount int) (*stripe.Payment
 		return nil, msg, err
 	}
 	return pi, "", nil
+}
+
+// Gets the payment method by payment intent ID
+func (c *Card) GetPaymentMethod(s string) (*stripe.PaymentMethod, error) {
+	stripe.Key = c.Secret
+
+	pm, err := paymentmethod.Get(s, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return pm, nil
+}
+
+// Gets existing payment intent by ID
+func (c *Card) RetrievePaymentIntent(id string) (*stripe.PaymentIntent, error) {
+	stripe.Key = c.Secret
+
+	pi, err := paymentintent.Get(id, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return pi, nil
 }
 
 func cardErrorMessage(code stripe.ErrorCode) string {
