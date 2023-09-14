@@ -127,14 +127,13 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 
 	okay := true
 	var subscription *stripe.Subscription
-	txnMsg := "Transaction Successful"
+	txnMsg := "Transaction successful"
 
 	stripeCustomer, msg, err := card.CreateCustomer(data.PaymentMethod, data.Email)
 	if err != nil {
 		app.errorLog.Println(err)
 		okay = false
 		txnMsg = msg
-
 	}
 
 	if okay {
@@ -148,24 +147,20 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 	}
 
 	if okay {
-		productID, err := strconv.Atoi(data.ProductID)
-		if err != nil {
-			app.errorLog.Println(err)
-			return
-		}
+		productID, _ := strconv.Atoi(data.ProductID)
 		customerID, err := app.SaveCustomer(data.FirstName, data.LastName, data.Email)
 		if err != nil {
 			app.errorLog.Println(err)
 			return
 		}
 
-		// create a new transaction
+		// create a new txn
 		amount, _ := strconv.Atoi(data.Amount)
 		// expiryMonth, _ := strconv.Atoi(data.ExpiryMonth)
 		// expiryYear, _ := strconv.Atoi(data.ExpiryYear)
 		txn := models.Transaction{
 			Amount:              amount,
-			Currency:            "gbp",
+			Currency:            "cad",
 			LastFour:            data.LastFour,
 			ExpiryMonth:         data.ExpiryMonth,
 			ExpiryYear:          data.ExpiryYear,
@@ -195,7 +190,6 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 			app.errorLog.Println(err)
 			return
 		}
-
 	}
 
 	resp := jsonResponse{
@@ -213,6 +207,7 @@ func (app *application) CreateCustomerAndSubscribeToPlan(w http.ResponseWriter, 
 	w.Write(out)
 }
 
+// SaveCustomer saves a customer and returns id
 func (app *application) SaveCustomer(firstName, lastName, email string) (int, error) {
 	customer := models.Customer{
 		FirstName: firstName,
@@ -227,6 +222,7 @@ func (app *application) SaveCustomer(firstName, lastName, email string) (int, er
 	return id, nil
 }
 
+// SaveTransaction saves a txn and returns id
 func (app *application) SaveTransaction(txn models.Transaction) (int, error) {
 	id, err := app.DB.InsertTransaction(txn)
 	if err != nil {
@@ -235,10 +231,35 @@ func (app *application) SaveTransaction(txn models.Transaction) (int, error) {
 	return id, nil
 }
 
+// SaveOrder saves a order and returns id
 func (app *application) SaveOrder(order models.Order) (int, error) {
 	id, err := app.DB.InsertOrder(order)
 	if err != nil {
 		return 0, err
 	}
 	return id, nil
+}
+
+func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) {
+	var userInput struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	err := app.readJSON(w, r, &userInput)
+	if err != nil {
+		app.badRequest(w, r, err)
+		return
+	}
+
+	var payload struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+	payload.Error = false
+	payload.Message = "Success!"
+
+	out, _ := json.MarshalIndent(payload, "", "\t")
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(out)
 }
