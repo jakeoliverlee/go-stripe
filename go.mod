@@ -10,5 +10,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/stripe/stripe-go v70.15.0+incompatible // indirect
 	github.com/stripe/stripe-go/v72 v72.51.0 // indirect
+	golang.org/x/crypto v0.13.0
 	golang.org/x/tools v0.12.0 // indirect
 )
