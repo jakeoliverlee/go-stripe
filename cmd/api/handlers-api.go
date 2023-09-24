@@ -255,7 +255,7 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// get the user from the database by email, send error if invalid email
+	// get the user from the database by email; send error if invalid email
 	user, err := app.DB.GetUserByEmail(userInput.Email)
 	if err != nil {
 		app.invalidCredentials(w)
@@ -274,7 +274,7 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	// generate token
+	// generate the token
 	token, err := models.GenerateToken(user.ID, 24*time.Hour, models.ScopeAuthentication)
 	if err != nil {
 		app.badRequest(w, r, err)
@@ -282,7 +282,6 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// save to database
-
 	err = app.DB.InsertToken(token, user)
 	if err != nil {
 		app.badRequest(w, r, err)
@@ -304,15 +303,14 @@ func (app *application) CreateAuthToken(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) authenticateToken(r *http.Request) (*models.User, error) {
-
 	authorizationHeader := r.Header.Get("Authorization")
 	if authorizationHeader == "" {
-		return nil, errors.New("no auth header received")
+		return nil, errors.New("no authorization header received")
 	}
 
 	headerParts := strings.Split(authorizationHeader, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-		return nil, errors.New("no auth header received")
+		return nil, errors.New("no authorization header received")
 	}
 
 	token := headerParts[1]
@@ -330,8 +328,7 @@ func (app *application) authenticateToken(r *http.Request) (*models.User, error)
 }
 
 func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Request) {
-	// validate token, and get associated user.
-
+	// validate the token, and get associated user
 	user, err := app.authenticateToken(r)
 	if err != nil {
 		app.invalidCredentials(w)
@@ -343,7 +340,6 @@ func (app *application) CheckAuthentication(w http.ResponseWriter, r *http.Reque
 		Error   bool   `json:"error"`
 		Message string `json:"message"`
 	}
-
 	payload.Error = false
 	payload.Message = fmt.Sprintf("authenticated user %s", user.Email)
 	app.writeJSON(w, http.StatusOK, payload)
@@ -367,6 +363,7 @@ func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r
 	err := app.readJSON(w, r, &txnData)
 	if err != nil {
 		app.badRequest(w, r, err)
+		return
 	}
 
 	card := cards.Card{
@@ -396,6 +393,8 @@ func (app *application) VirtualTerminalPaymentSucceeded(w http.ResponseWriter, r
 		LastFour:            txnData.LastFour,
 		ExpiryMonth:         txnData.ExpiryMonth,
 		ExpiryYear:          txnData.ExpiryYear,
+		PaymentIntent:       txnData.PaymentIntent,
+		PaymentMethod:       txnData.PaymentMethod,
 		BankReturnCode:      pi.Charges.Data[0].ID,
 		TransactionStatusID: 2,
 	}

@@ -12,6 +12,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/alexedwards/scs/mysqlstore"
 	"github.com/alexedwards/scs/v2"
 )
 
@@ -82,9 +83,9 @@ func main() {
 	defer conn.Close()
 
 	// setup session
-
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
+	session.Store = mysqlstore.New(conn)
 
 	tc := make(map[string]*template.Template)
 

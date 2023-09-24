@@ -3,6 +3,7 @@ module myapp
 go 1.16
 
 require (
+	github.com/alexedwards/scs/mysqlstore v0.0.0-20230902070821-95fa2ac9d520 // indirect
 	github.com/alexedwards/scs/v2 v2.5.1 // indirect
 	github.com/go-chi/chi v1.5.4 // indirect
 	github.com/go-chi/chi/v5 v5.0.3 // indirect
