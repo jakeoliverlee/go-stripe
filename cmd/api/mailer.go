@@ -10,13 +10,13 @@ import (
 	mail "github.com/xhit/go-simple-mail/v2"
 )
 
-// go:embed templates
-var emailTemplatesFS embed.FS
+//go:embed templates
+var emailTemplateFS embed.FS
 
 func (app *application) SendMail(from, to, subject, tmpl string, data interface{}) error {
 	templateToRender := fmt.Sprintf("templates/%s.html.tmpl", tmpl)
 
-	t, err := template.New("email-html").ParseFS(emailTemplatesFS, templateToRender)
+	t, err := template.New("email-html").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
 		app.errorLog.Println(err)
 		return err
@@ -31,7 +31,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	formattedMessage := tpl.String()
 
 	templateToRender = fmt.Sprintf("templates/%s.plain.tmpl", tmpl)
-	t, err = template.New("email-plain").ParseFS(emailTemplatesFS, templateToRender)
+	t, err = template.New("email-plain").ParseFS(emailTemplateFS, templateToRender)
 	if err != nil {
 		app.errorLog.Println(err)
 		return err
@@ -47,7 +47,6 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	app.infoLog.Println(formattedMessage, plainMessage)
 
 	// send the mail
-
 	server := mail.NewSMTPClient()
 	server.Host = app.config.smtp.host
 	server.Port = app.config.smtp.port
@@ -74,6 +73,7 @@ func (app *application) SendMail(from, to, subject, tmpl string, data interface{
 	err = email.Send(smtpClient)
 	if err != nil {
 		app.errorLog.Println(err)
+		return err
 	}
 
 	app.infoLog.Println("send mail")

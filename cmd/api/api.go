@@ -49,7 +49,7 @@ func (app *application) serve() error {
 		WriteTimeout:      5 * time.Second,
 	}
 
-	app.infoLog.Println(fmt.Sprintf("Starting Back end server in %s mode on port %d", app.config.env, app.config.port))
+	app.infoLog.Printf("Starting Back end server in %s mode on port %d\n", app.config.env, app.config.port)
 
 	return srv.ListenAndServe()
 }
@@ -57,12 +57,17 @@ func (app *application) serve() error {
 func main() {
 	var cfg config
 
+	dsn := os.Getenv("DATABASE_DSN")
+	if dsn == "" {
+		log.Fatal("DATABASE_DSN environment variable is required")
+	}
+
 	flag.IntVar(&cfg.port, "port", 4001, "Server port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "Application environment {development|production|maintenance}")
-	// flag.StringVar(&cfg.db.dsn, "dsn", "jake:@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
-	flag.StringVar(&cfg.db.dsn, "smtphost", "smtp.mailtrap.io", "smtp host")
+	flag.StringVar(&cfg.db.dsn, "dsn", dsn, "DSN")
+	flag.StringVar(&cfg.smtp.host, "smtphost", "smtp.mailtrap.io", "smtp host")
 	flag.StringVar(&cfg.smtp.username, "smtpuser", "d543e89ebc4b96", "smtp user")
-	flag.StringVar(&cfg.smtp.password, "smtppass", "cdd17a02b7db1b", "smtp pass")
+	flag.StringVar(&cfg.smtp.password, "smtppass", "cdd17a02b7db1b", "smtp password")
 	flag.IntVar(&cfg.smtp.port, "smtpport", 587, "smtp port")
 
 	flag.Parse()
@@ -75,7 +80,7 @@ func main() {
 
 	conn, err := driver.OpenDB(cfg.db.dsn)
 	if err != nil {
-		errorLog.Println(err)
+		errorLog.Fatal(err)
 	}
 	defer conn.Close()
 

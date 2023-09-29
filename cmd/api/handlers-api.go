@@ -413,7 +413,7 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 		Email string `json:"email"`
 	}
 
-	err := app.readJSON(w, r, payload)
+	err := app.readJSON(w, r, &payload)
 	if err != nil {
 		app.badRequest(w, r, err)
 		return
@@ -423,8 +423,22 @@ func (app *application) SendPasswordResetEmail(w http.ResponseWriter, r *http.Re
 		Link string
 	}
 
-	data.Link = "http://google.com"
+	data.Link = "http://jakeoliverlee.com"
 
 	// send mail
+	err = app.SendMail("info@widgets.com", "info@widgets.com", "Password Reset Request", "password-reset", data)
+	if err != nil {
+		app.errorLog.Println(err)
+		app.badRequest(w, r, err)
+		return
+	}
 
+	var resp struct {
+		Error   bool   `json:"error"`
+		Message string `json:"message"`
+	}
+
+	resp.Error = false
+
+	app.writeJSON(w, http.StatusCreated, resp)
 }
