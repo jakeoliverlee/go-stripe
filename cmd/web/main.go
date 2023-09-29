@@ -63,9 +63,14 @@ func main() {
 	gob.Register(TransactionData{})
 	var cfg config
 
+	dsn := os.Getenv("DATABASE_DSN")
+	if dsn == "" {
+		log.Fatal("DATABASE_DSN environment variable is required")
+	}
+
 	flag.IntVar(&cfg.port, "port", 4000, "Server port to listen on")
 	flag.StringVar(&cfg.env, "env", "development", "Application enviornment {development|production}")
-	flag.StringVar(&cfg.db.dsn, "dsn", "jake:EmiliaHaysom15@tcp(localhost:3306)/widgets?parseTime=true&tls=false", "DSN")
+	flag.StringVar(&cfg.db.dsn, "dsn", dsn, "DSN")
 	flag.StringVar(&cfg.api, "api", "http://localhost:4001", "URL to api")
 
 	flag.Parse()
